@@ -2,12 +2,17 @@
 require __DIR__.'/../src/Session.php';
 require __DIR__.'/../src/Input.php';
 require __DIR__.'/../src/Draft.php';
+require __DIR__.'/../src/DraftGuard.php'; // Đã nạp tệp DraftGuard
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     checkCsrf($_POST);
-    if (draftExpired($_SESSION, time(), 1800)) {
+    
+    // Thay điều kiện cũ bằng hàm canComplete vừa viết
+    if (!canComplete($_SESSION, (int)field($_POST, 'event_id'), time(), 1800)) {
         cancelDraft($_SESSION);
         header('Location: /register.php', true, 303); exit;
     }
+    
     $_SESSION['completed'] = 'SIMULATED_OK';
     cancelDraft($_SESSION);
     header('Location: /complete.php', true, 303); exit;
