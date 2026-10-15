@@ -1,15 +1,21 @@
 <?php
 declare(strict_types=1);
 
-function filterEvents(array $events, string $query, string $category = '',
-    bool $availableOnly = false): array
+function filterEvents(array $events, string $query, string $category = '', bool $availableOnly = false): array
 {
-    // TODO phần mở rộng: thêm category và availableOnly bằng AND.
     $result = [];
     foreach ($events as $event) {
-        $matches = $query === ''
-            || stripos($event['title'], $query) !== false;
-        if ($matches) {
+        // 1. Kiểm tra từ khóa
+        $matchesQuery = $query === '' || stripos($event['title'], $query) !== false;
+        
+        // 2. Kiểm tra loại sự kiện (nếu category rỗng nghĩa là lấy tất cả)
+        $matchesCategory = $category === '' || $event['category'] === $category;
+        
+        // 3. Kiểm tra tình trạng còn chỗ (capacity - registered > 0)
+        $matchesAvailable = !$availableOnly || ($event['capacity'] - $event['registered'] > 0);
+
+        // Kết hợp cả 3 điều kiện bằng toán tử AND (&&)
+        if ($matchesQuery && $matchesCategory && $matchesAvailable) {
             $result[] = $event;
         }
     }

@@ -2,8 +2,15 @@
 require __DIR__ . '/../src/Input.php';
 require __DIR__ . '/../src/EventFilter.php';
 $events = require __DIR__ . '/../data/events.php';
+
+// Phần mở rộng: Đọc thêm điều kiện category và available từ URL GET
 $query = field($_GET, 'q');
-$visible = filterEvents($events, $query);
+$category = field($_GET, 'category');
+$availableOnly = field($_GET, 'available') === '1';
+
+// Gọi hàm filterEvents với đủ 4 tham số để lọc kết hợp
+$visible = filterEvents($events, $query, $category, $availableOnly);
+
 require_once __DIR__ . '/../templates/event-presentation.php';
 require __DIR__ . '/../templates/header.php';
 ?>
@@ -11,12 +18,29 @@ require __DIR__ . '/../templates/header.php';
 <h1>Sự kiện</h1>
 <p>Tìm theo tên và xem thông tin sự kiện.</p>
 </div>
+
+<!-- Form tìm kiếm được bổ sung thêm Loại và Checkbox còn chỗ -->
 <form class="search-form" method="get">
     <label class="form-field" for="q">Từ khóa
-<input id="q" name="q" value="<?= e($query) ?>">
+        <input id="q" name="q" value="<?= e($query) ?>">
     </label>
+    
+    <label class="form-field" for="category">Loại
+        <select id="category" name="category">
+            <option value="">Tất cả</option>
+            <option value="tech" <?= $category === 'tech' ? 'selected' : '' ?>>Tech</option>
+            <option value="design" <?= $category === 'design' ? 'selected' : '' ?>>Design</option>
+        </select>
+    </label>
+
+    <label class="form-field checkbox-field">
+        <input type="checkbox" name="available" value="1" <?= $availableOnly ? 'checked' : '' ?>>
+        Chỉ hiện sự kiện còn chỗ
+    </label>
+
     <button>Tìm</button>
 </form>
+
 <p class="result-count">Kết quả: <?= count($visible) ?></p>
 <section class="event-list" aria-label="Danh sách sự kiện">
 <?php foreach ($visible as $event): ?>
@@ -41,12 +65,15 @@ require __DIR__ . '/../templates/header.php';
 </article>
 <?php endforeach; ?>
 </section>
+
 <?php if (!$visible): ?>
     <p class="empty-state">Không có kết quả.<span>Thử tìm với một từ khóa khác.</span>
 </p>
 <?php endif; ?>
+
 <p class="content-note">Thời gian, địa điểm và ảnh bổ sung là nội dung hư cấu phục vụ học tập. Dữ liệu đăng ký vẫn lấy từ nguồn gốc của lab.</p>
 <section class="demo-entry"><h2>Sáu bối cảnh, một khu thử riêng</h2>
 <p>Hội thảo, workshop, âm nhạc, nghề nghiệp, online và triển lãm. Thử vé và ghế mà không đưa lựa chọn vào đăng ký của lab.</p>
 <a class="text-button" href="/ui-demo.php">Khám phá sự kiện mẫu</a></section>
+
 <?php require __DIR__ . '/../templates/footer.php'; ?>
