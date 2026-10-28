@@ -1,145 +1,216 @@
-/* Tổng quan giao diện */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary: #1877F2; /* Xanh Facebook */
+    --bg-color: #F0F2F5; /* Nền xám Facebook */
+    --card-bg: #FFFFFF;
+    --text-main: #050505;
+    --text-muted: #65676B;
+    --border-color: #CED0D4;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8f9fa;
-    color: #333;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
     margin: 0;
-    padding: 0;
+    padding: 30px 0;
 }
 
+/* Đưa bố cục ra giữa màn hình, thu hẹp lại giống bảng tin */
 .container {
-    max-width: 1200px;
+    max-width: 720px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 0 15px;
 }
 
-/* Bố cục trang chi tiết (Split-screen) */
-.project-layout {
+.page-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+    .page-header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+/* 1. HỘP TẢI ẢNH HIỆN ĐẠI (DRAG & DROP STYLE) */
+.modern-upload {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.upload-area {
+    border: 2px dashed #CCD0D5;
+    border-radius: 8px;
+    padding: 30px 20px;
+    cursor: pointer;
+    transition: background 0.2s;
     display: flex;
-    gap: 20px;
-    margin-top: 20px;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 }
 
-.design-viewer-pane {
-    flex: 2;
-    background: #fff;
+    .upload-area:hover {
+        background: #F8F9FA;
+    }
+
+    .upload-area input[type="file"] {
+        display: none; /* Ẩn nút chọn file xấu xí mặc định */
+    }
+
+.upload-icon {
+    font-size: 32px;
+}
+
+#btn-upload {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 15px;
+    display: none; /* Chỉ hiện khi người dùng đã chọn ảnh */
+    transition: 0.2s;
+}
+
+    #btn-upload:hover {
+        background: #166FE5;
+    }
+
+/* 2. KHU VỰC ẢNH THIẾT KẾ */
+.design-post {
+    background: var(--card-bg);
+    border-radius: 12px;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    margin-bottom: 24px;
 }
 
-.feedback-sidebar {
-    flex: 1;
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-/* Khu vực chứa ảnh thiết kế và điểm ghim */
-.image-container {
+#image-container {
     position: relative;
-    display: inline-block;
-    cursor: crosshair;
-    max-width: 100%;
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    user-select: none;
 }
 
-.image-container img {
+#design-image {
     display: block;
     width: 100%;
     height: auto;
-    border-radius: 4px;
+    cursor: crosshair;
 }
 
-/* Kiểu dáng điểm ghim (Annotation Pin) */
-.annotation-pin {
-    position: absolute;
-    width: 28px;
-    height: 28px;
-    background-color: #dc3545;
-    color: white;
+/* 3. KHU VỰC BÌNH LUẬN KIỂU FACEBOOK */
+.comments-section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.feedback-card, .feedback-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    background: #E4E6EB;
     border-radius: 50%;
-    text-align: center;
-    line-height: 28px;
-    font-weight: bold;
+    flex-shrink: 0;
+    background-image: url('https://ui-avatars.com/api/?name=User&background=E4E6EB&color=65676B');
+    background-size: cover;
+}
+
+.comment-content {
+    background: var(--bg-color);
+    padding: 12px 16px;
+    border-radius: 18px;
+    flex-grow: 1;
+}
+
+.comment-author {
+    font-weight: 600;
     font-size: 14px;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
-    border: 2px solid #fff;
+    margin-bottom: 8px;
 }
 
-.annotation-pin:hover {
-    transform: translate(-50%, -50%) scale(1.15);
-    background-color: #bb2d3b;
-}
-
-/* Danh sách góp ý bên sidebar */
-.comment-card {
-    background: #fdfdfe;
-    border: 1px solid #e9ecef;
-    border-radius: 6px;
-    padding: 12px;
-    margin-bottom: 12px;
-    transition: border-color 0.2s;
-}
-
-.comment-card:hover {
-    border-color: #0d6efd;
-}
-
-.comment-card .pin-badge {
-    display: inline-block;
-    width: 22px;
-    height: 22px;
-    background-color: #dc3545;
-    color: white;
-    border-radius: 50%;
-    text-align: center;
-    line-height: 22px;
-    font-size: 12px;
-    margin-right: 6px;
-}
-
-/* Nút bấm và Form */
-.btn {
-    display: inline-block;
-    font-weight: 400;
-    line-height: 1.5;
-    text-align: center;
-    text-decoration: none;
-    vertical-align: middle;
-    cursor: pointer;
-    padding: 6px 12px;
-    font-size: 14px;
-    border-radius: 4px;
-    border: 1px solid transparent;
-    transition: background-color 0.2s;
-}
-
-.btn-primary {
-    color: #fff;
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-
-.btn-primary:hover {
-    background-color: #0b5ed7;
-}
-
-.form-control {
-    display: block;
+textarea#feedback-text {
     width: 100%;
-    padding: 8px 12px;
-    font-size: 14px;
-    line-height: 1.5;
-    color: #495057;
-    background-color: #fff;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    box-sizing: border-box;
-    margin-bottom: 10px;
+    border: none;
+    background: transparent;
+    resize: none;
+    font-family: inherit;
+    font-size: 15px;
+    outline: none;
+    padding: 0;
+}
+
+.btn-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+    .btn-group button {
+        border: none;
+        padding: 6px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+#btn-save {
+    background: var(--primary);
+    color: white;
+}
+
+#btn-cancel {
+    background: #E4E6EB;
+    color: #050505;
+}
+
+.selection-box {
+    position: absolute;
+    border: 2px dashed var(--primary);
+    background: rgba(24, 119, 242, 0.15);
+    pointer-events: none;
+    z-index: 999;
+}
+
+.cropped-preview {
+    max-width: 180px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border-color);
+    display: block;
 }

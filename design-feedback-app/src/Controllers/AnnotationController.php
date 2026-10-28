@@ -1,49 +1,53 @@
 <?php
-require_once __DIR__ . '/../Models/Annotation.php';
-require_once __DIR__ . '/../Middlewares/AuthMiddleware.php';
-
 class AnnotationController {
     private $db;
-    private $annotationModel;
 
     public function __construct($db) {
         $this->db = $db;
-        $this->annotationModel = new Annotation($db);
     }
 
-    // Xử lý API tạo góp ý mới
     public function store($projectId, $userId) {
-        // Kiểm tra quyền: Người dùng phải có ít nhất quyền 'editor' (hoặc manager) mới được tạo góp ý
-        AuthMiddleware::checkProjectAccess($this->db, $projectId, $userId, 'editor');
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data = [
-                'image_version_id' => $_POST['image_version_id'] ?? null,
-                'user_id' => $userId,
-                'type' => $_POST['type'] ?? 'point', // 'point' hoặc 'rectangle'
-                'x' => $_POST['x'] ?? 0,
-                'y' => $_POST['y'] ?? 0,
-                'width' => $_POST['width'] ?? 0,
-                'height' => $_POST['height'] ?? 0
-            ];
+            $content = $_POST['content'] ?? '';
+            $cx = $_POST['coordinate_x'] ?? 0;
+            $cy = $_POST['coordinate_y'] ?? 0;
+            $crop = $_POST['cropped_image'] ?? '';
 
-            if ($this->annotationModel->create($data)) {
-                echo json_encode(["status" => "success", "message" => "Tạo góp ý thành công!"]);
+            $stmt = $this->db->prepare("INSERT INTO annotations (project_id, user_id, content, coordinate_x, coordinate_y, cropped_image) VALUES (?, ?, ?, ?, ?, ?)");
+            $success = $stmt->execute([$projectId, $userId, $content, $cx, $cy, $crop]);
+            
+            if (ob_get_length()) ob_clean(); // Xóa sạch các rác HTML/cảnh báo PHP thừa
+            
+            if ($success) {
+                echo json_encode(["status" => "success"]);
             } else {
-                header("HTTP/1.1 500 Internal Server Error");
-                echo json_encode(["status" => "error", "message" => "Không thể lưu góp ý vào CSDL."]);
+                $error = $stmt->errorInfo();
+                http_response_code(500);
+                echo json_encode(["status" => "error", "message" => "Lỗi MySQL: " . ($error[2] ?? 'Không rõ nguyên nhân')]);
             }
             exit;
         }
     }
 
-    // Lấy danh sách JSON các góp ý để Frontend render
     public function fetchByVersion($imageVersionId, $projectId, $userId) {
-        AuthMiddleware::checkProjectAccess($this->db, $projectId, $userId, 'viewer');
+        $stmt = $this->db->prepare("
+            SELECT a.*, u.fullname 
+            FROM annotations a 
+            JOIN users u ON a.user_id = u.id 
+            ORDER BY a.id DESC
+        ");
+        $success = $stmt->execute();
         
-        $annotations = $this->annotationModel->getByVersion($imageVersionId);
+        if (ob_get_length()) ob_clean();
         header('Content-Type: application/json');
-        echo json_encode($annotations);
+        
+        if ($success) {
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode(['success' => true, 'data' => $data]);
+        } else {
+            $error = $stmt->errorInfo();
+            echo json_encode(['success' => false, 'message' => "Lỗi MySQL: " . ($error[2] ?? 'Không rõ')]);
+        }
         exit;
     }
 }
