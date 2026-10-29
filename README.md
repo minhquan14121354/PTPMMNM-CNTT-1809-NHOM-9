@@ -15,3 +15,6 @@
 - **Test 2**: Truy cập ngoài Dự án $\rightarrow$ Máy chủ chặn truy cập và trả về cảnh báo an toàn.
 - **Test 3**: Nút So sánh Side-by-side $\rightarrow$ Hiển thị V1 và phiên bản hiện tại song song.
 - **Test 4**: Lọc góp ý Open/Resolved và Xuất báo cáo nghiệm thu qua `window.print()`.
+## Tài khoản admin 
+tk: admin 
+mk: 123456
